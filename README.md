@@ -29,64 +29,89 @@ AI-AGENT/
 ├── README.md             # Project documentation
 └── .gitignore            # Git exclusion rules
 
-⚡ Setup & Installation
+## ⚡ Setup & Installation
+
 Follow these steps to get the project running locally.
 
-1. Prerequisites
-Node.js (v18 or higher)
+### 1. Prerequisites
 
-Python (3.10 or higher)
+- **Node.js** (v18 or higher)
+- **Python** (3.10 or higher)
+- **Gemini API Key** — Obtain one at [Google AI Studio](https://aistudio.google.com)
 
-Gemini API Key (Obtain one at Google AI Studio)
+---
 
-2. Backend Setup
-Navigate to the backend directory:
+### 2. Backend Setup
 
-Bash
+Navigate to the `backend` directory:
+
+```bash
 cd backend
-Create and Activate Virtual Environment:
+```
 
-Windows:
+**i. Create and Activate Virtual Environment**
 
-Bash
-python -m venv venv
-venv\Scripts\activate
-Mac/Linux:
+- Windows:
+  ```bash
+  python -m venv venv
+  venv\Scripts\activate
+  ```
 
-Bash
-python3 -m venv venv
-source venv/bin/activate
-Install Dependencies:
+- Mac/Linux:
+  ```bash
+  python3 -m venv venv
+  source venv/bin/activate
+  ```
 
-Bash
+**ii. Install Dependencies**
+
+```bash
 pip install fastapi uvicorn google-genai python-dotenv
-Configure Environment Variables:
-Create a .env file in the backend/ folder and add your key:
+```
 
-Plaintext
+**iii. Configure Environment Variables**
+
+Create a `.env` file in the `backend/` folder and add your key:
+
+```plaintext
 GEMINI_API_KEY=your_actual_api_key_here
-Run the Server:
+```
 
-Bash
+**iv. Run the Server**
+
+```bash
 uvicorn main:app --reload
-3. Frontend Setup
-Open a new terminal and navigate to the frontend directory:
+```
 
-Bash
+---
+
+### 3. Frontend Setup
+
+Open a new terminal and navigate to the `frontend` directory:
+
+```bash
 cd frontend
-Install Packages:
+```
 
-Bash
+**i. Install Packages**
+
+```bash
 npm install
-Run Development Server:
+```
 
-Bash
+**ii. Run Development Server**
+
+```bash
 npm run dev
-🛡️ Security & Best Practices
-Environment Isolation: Sensitive credentials like the GEMINI_API_KEY are stored in a local .env file. This file is explicitly ignored by Git to prevent leaking secrets to public repositories.
+```
 
-CORS Middleware: The FastAPI backend implements CORSMiddleware to strictly control which frontend origins can access the API, preventing unauthorized cross-origin requests.
+---
 
-Asynchronous Execution: By utilizing async endpoints in FastAPI, the agent can handle I/O-bound tasks (like web searching) without blocking the server, ensuring high availability.
+## 🛡️ Security & Best Practices
 
-Dependency Locking: Python dependencies are managed within a virtual environment (venv) to ensure a consistent, reproducible execution environment across different development machines.
+| Practice | Description |
+|---|---|
+| **Environment Isolation** | Sensitive credentials like `GEMINI_API_KEY` are stored in a local `.env` file, explicitly ignored by Git to prevent leaking secrets to public repositories. |
+| **CORS Middleware** | The FastAPI backend implements `CORSMiddleware` to strictly control which frontend origins can access the API, preventing unauthorized cross-origin requests. |
+| **Asynchronous Execution** | `async` endpoints in FastAPI allow the agent to handle I/O-bound tasks (like web searching) without blocking the server, ensuring high availability. |
+| **Dependency Locking** | Python dependencies are managed within a virtual environment (`venv`) to ensure a consistent, reproducible execution environment across machines. |

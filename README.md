@@ -1,51 +1,40 @@
-# 🏛️ Project Coeus: Real-Time Web-Searching Agent
+# 🏛️ Project Coeus: Hybrid AI Research Agent
 
-**Coeus** is a full-stack AI research assistant that bridges the gap between Large Language Models and the live internet. By combining a FastAPI backend with a Vite-powered React frontend, it enables users to ask complex questions and receive up-to-the-minute answers with verified source citations.
+**Coeus** is a full-stack AI research assistant that bridges the gap between Large Language Models, the live internet, and your personal data. By combining a FastAPI backend with a Vite-powered React frontend, it enables users to switch between real-time web research and deep-dive document analysis.
 
 ## 🚀 Key Features
 
-- **Live Web Grounding:** Leverages Gemini's Google Search integration to bypass static knowledge cutoffs.
-- **Source Transparency:** Extracts and displays specific URLs used to generate each response.
-- **Modern Frontend:** Built with **Vite, TypeScript, and React** for a fast, type-safe user experience.
-- **Modular Backend:** Clean separation between AI logic (`agent.py`) and API service (`main.py`).
+- **Hybrid Grounding:**
+  - **Web Search:** Uses Google Search to bypass knowledge cutoffs for current events.
+  - **Document RAG:** Securely processes uploaded PDFs/documents to provide answers grounded strictly in your files.
+- **Source Transparency:** Displays specific URLs for web searches and clear file references for document analysis.
+- **Modern Frontend:** Built with **Vite, TypeScript, and React** for a fast, responsive user experience.
+- **Efficient Backend:** Uses an asynchronous FastAPI architecture to handle both web-scraping and file-indexing without blocking.
 
 ## 🛠️ Tech Stack
 
 - **Frontend:** React 19, Vite, TypeScript, Axios.
 - **Backend:** Python 3.12+, FastAPI, Uvicorn, `google-genai`.
-- **Security:** Environment variable management via `python-dotenv`.
+- **AI Core:** Gemini 2.5 Flash (via Google GenAI SDK).
+- **Environment:** `python-dotenv`.
 
 ## 📂 Project Structure
 
 ```text
 AI-AGENT/
 ├── backend/
-│   ├── venv/             # Python virtual environment
-│   ├── .env              # API Key storage (Protected)
-│   ├── agent.py          # Gemini AI agent & Tool config
-│   └── main.py           # FastAPI routes & CORS logic
+│   ├── agent.py          # Hybrid Agent (Search + RAG logic)
+│   ├── main.py           # FastAPI routes (Uploads, Search, Doc Query)
+│   └── .env              # API Keys (Protected)
 ├── frontend/
-│   ├── src/              # React components (App.tsx, main.tsx)
-│   ├── index.html        # Entry point
-│   ├── vite.config.ts    # Vite configuration
-│   └── package.json      # Node dependencies
-├── README.md             # Project documentation
-└── .gitignore            # Git exclusion rules
+│   └── src/
+│       └── FileSearch.tsx # Document upload & RAG interface
+└── README.md             # Documentation
 ```
 
 ## ⚡ Setup & Installation
 
-Follow these steps to get the project running locally.
-
-### 1. Prerequisites
-
-- **Node.js** (v18 or higher)
-- **Python** (3.10 or higher)
-- **Gemini API Key** — Obtain one at [Google AI Studio](https://aistudio.google.com)
-
----
-
-### 2. Backend Setup
+### 1. Backend Setup
 
 Navigate to the `backend` directory:
 
@@ -53,35 +42,21 @@ Navigate to the `backend` directory:
 cd backend
 ```
 
-**i. Create and Activate Virtual Environment**
-
-- Windows:
-  ```bash
-  python -m venv venv
-  venv\Scripts\activate
-  ```
-
-- Mac/Linux:
-  ```bash
-  python3 -m venv venv
-  source venv/bin/activate
-  ```
-
-**ii. Install Dependencies**
+**i. Install Dependencies**
 
 ```bash
 pip install fastapi uvicorn google-genai python-dotenv
 ```
 
-**iii. Configure Environment Variables**
+**ii. Configure Environment Variables**
 
-Create a `.env` file in the `backend/` folder and add your key:
+Ensure your `.env` file contains your API key:
 
 ```plaintext
 GEMINI_API_KEY=your_actual_api_key_here
 ```
 
-**iv. Run the Server**
+**iii. Run the Server**
 
 ```bash
 uvicorn main:app --reload
@@ -89,7 +64,7 @@ uvicorn main:app --reload
 
 ---
 
-### 3. Frontend Setup
+### 2. Frontend Setup
 
 Open a new terminal and navigate to the `frontend` directory:
 
@@ -111,11 +86,18 @@ npm run dev
 
 ---
 
+## 🧠 How the RAG Feature Works
+
+1. **Upload:** Your PDF is sent to the `/upload` endpoint, where it is saved temporarily and uploaded to Gemini's File API.
+2. **Indexing:** The agent waits for the file state to transition to `ACTIVE` before allowing queries.
+3. **Hybrid Routing:**
+   - **Web Query:** Uses a persistent chat session with the Google Search tool.
+   - **Doc Query:** Uses a fresh `generate_content` call, injecting the `file_id` as context — ensuring the AI focuses only on your provided document.
+
 ## 🛡️ Security & Best Practices
 
 | Practice | Description |
 |---|---|
-| **Environment Isolation** | Sensitive credentials like `GEMINI_API_KEY` are stored in a local `.env` file, explicitly ignored by Git to prevent leaking secrets to public repositories. |
-| **CORS Middleware** | The FastAPI backend implements `CORSMiddleware` to strictly control which frontend origins can access the API, preventing unauthorized cross-origin requests. |
-| **Asynchronous Execution** | `async` endpoints in FastAPI allow the agent to handle I/O-bound tasks (like web searching) without blocking the server, ensuring high availability. |
-| **Dependency Locking** | Python dependencies are managed within a virtual environment (`venv`) to ensure a consistent, reproducible execution environment across machines. |
+| **File Lifecycle** | Temporary files are automatically deleted from the server after the upload process, preventing disk clutter. |
+| **Stateful Polling** | The agent uses `asyncio` to poll the Gemini File API, ensuring the server stays responsive while waiting for document indexing. |
+| **CORS Control** | Strict `CORSMiddleware` configuration ensures only trusted frontends communicate with your API. |

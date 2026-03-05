@@ -1,4 +1,5 @@
 import os
+import time
 from google import genai
 from google.genai import types
 from dotenv import load_dotenv
@@ -7,46 +8,43 @@ load_dotenv()
 
 gemini_api_key = os.getenv('GEMINI_API_KEY')
 
-# Setup the Client
 client = genai.Client(api_key=gemini_api_key)
 
-# Configure the Search Tool
-# This is the "Grounding" tool that gives the Gemini real-time web access
 search_tool = types.Tool(google_search=types.GoogleSearch())
 
-# Create the agentic chat
-chat = client.chats.create(
-    model='gemini-2.5-flash',
-    config=types.GenerateContentConfig(
-        tools=[search_tool],
-        # System instructions set the "personality" and rules
-        system_instruction="You are a realtime research assistant. Use Google Search for any current events or facts you aren't 100 percent sure about."
-    )
-)
+class HybridAgent:
+    def __init__(self):
+        self.chat = client.chats.create(
+            model='gemini-2.5-flash',
+            config=types.GenerateContentConfig(
+                tools=[search_tool],
+                system_instruction="You are a realtime research assistant. Use Google Search for any current events or facts you aren't 100 percent sure about."
+            )
+        )
 
-def get_agent_response(user_message: str):
-    print("--- Real-time Web Search Agent (Type 'exit' to quit) ---")
+    async def get_web_response(self, user_message: str):
+        print(f"User Message: {user_message}")
+        response = self.chat.send_message(user_message)
+        return {"answer": response.text}
+    
+    async def process_file(self, file_path: str):
+        uploaded_file = client.files.upload(file=file_path)
 
-    while True:
-        
-        if (user_message.lower() in ["exit", 'quit']):
-            break
+        while uploaded_file.state.name == "PROCESSING":
+            time.sleep(2)
+            uploaded_file = client.files.get(name=uploaded_file.name)
 
-        # The agent sends the message and automatically triggers search if needed
-        response = chat.send_message(user_message)
+        return uploaded_file.name
+    
+    async def get_doc_response(self, file_id: str, user_message: str):
+        active_file = client.files.get(name=file_id)
+        response = client.models.generate_content(
+            model='gemini-2.5-flash',
+            contents=[active_file, user_message],
+            config=types.GenerateContentConfig(
+                system_instruction='You are analyzing a private document. Only answer based on the provided file.'
+            )
+        )
+        return {"answer": response.text}
 
-        # Return the response
-        return {
-            "answer": response.text
-        }
-
-        # OPTIONAL: See exactly what the AI searched for and where it got the data
-        # if response.candidates[0].grounding_metadata:
-        #     metadata = response.candidates[0].grounding_metadata
-        #     if metadata.search_entry_point:
-        #         print("\n[Sources found via Google Search]")
-        #         # In 2026, the metadata provides specific URLs used
-        #         for chunk in metadata.grounding_chunks:
-        #             if chunk.web:
-        #                 print(f"- {chunk.web.title}: {chunk.web.url}")
-
+agent = HybridAgent()

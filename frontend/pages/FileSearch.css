@@ -1,0 +1,32 @@
+.file-input,
+.query-input {
+  padding: 0.5rem;
+  border: 2px solid darkslateblue;
+  border-radius: 5px;
+}
+
+.ask-button {
+  background-color: darkslateblue;
+  color: white;
+  padding: 0.5rem;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.chat-history {
+  margin: 1rem;
+  padding: 0.75rem;
+  background-color: #f0f0f0;
+  border-radius: 5px;
+  text-align: left;
+}
+
+.chat {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  padding: 1rem;
+  margin: 1rem;
+  border-radius: 5px;
+  overflow-y: auto;
+  height: 50vh;
+}
